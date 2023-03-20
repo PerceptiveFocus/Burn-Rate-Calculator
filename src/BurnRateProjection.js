@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
+import Chart from 'chart.js/auto';
 
 const App = () => {
   const [initialBalance, setInitialBalance] = useState(1000000);
