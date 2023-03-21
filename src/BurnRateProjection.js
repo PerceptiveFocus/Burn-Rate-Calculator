@@ -1,22 +1,24 @@
-import React, { useState } from 'react';
-import ReactDOM from 'react-dom';
+import React, { useState, useRef, useEffect } from 'react';
+import { Container, Form, Button } from 'react-bootstrap';
 import Chart from 'chart.js/auto';
 
-const App = () => {
-  const [initialBalance, setInitialBalance] = useState(1000000);
-  const [expenses, setExpenses] = useState(500000);
+const useBurnRateChart = (initialBalance, expenses, quarters) => {
+  const chartRef = useRef(null);
+  const canvasRef = useRef(null);
 
-  const quarters = [...Array(12).keys()].map((x) => x + 1);
+  useEffect(() => {
+    updateChart();
+  }, [initialBalance, expenses, quarters]);
 
-  const createBurnRateChart = () => {
+  const calculateBurnRateData = (initialBalance, expenses, quarters) => {
     const cashBalance = [initialBalance];
-    for (let i = 1; i < quarters.length; i++) {
+    for (let i = 1; i < quarters; i++) {
       cashBalance.push(cashBalance[i - 1] - expenses);
     }
     const burnRate = cashBalance.map((value) => value - expenses);
 
     const chartData = {
-      labels: quarters,
+      labels: [...Array(quarters).keys()].map((x) => x + 1),
       datasets: [
         {
           label: 'Burn Rate Projection',
@@ -30,62 +32,96 @@ const App = () => {
 
     const chartOptions = {
       scales: {
-        xAxes: [
-          {
-            scaleLabel: {
-              display: true,
-              labelString: 'Quarter',
-            },
+        x: {
+          title: {
+            display: true,
+            text: 'Quarter',
           },
-        ],
-        yAxes: [
-          {
-            scaleLabel: {
-              display: true,
-              labelString: 'Cash Balance',
-            },
+        },
+        y: {
+          title: {
+            display: true,
+            text: 'Cash Balance',
           },
-        ],
+        },
       },
     };
 
-    const ctx = document.getElementById('burn-rate-chart').getContext('2d');
-    new Chart(ctx, {
+    return { chartData, chartOptions };
+  };
+
+  const updateChart = () => {
+    if (chartRef.current) {
+      chartRef.current.destroy();
+    }
+
+    const burnRateData = calculateBurnRateData(initialBalance, expenses, quarters);
+    const ctx = canvasRef.current.getContext('2d');
+
+    chartRef.current = new Chart(ctx, {
       type: 'line',
-      data: chartData,
-      options: chartOptions,
+      data: burnRateData.chartData,
+      options: burnRateData.chartOptions,
     });
   };
 
+  return { updateChart, canvasRef };
+};
+
+const BurnRateCalculator = () => {
+  const [initialBalance, setInitialBalance] = useState(0);
+  const [expenses, setExpenses] = useState(0);
+  const [quarters, setQuarters] = useState(0);
+
+  const { updateChart, canvasRef } = useBurnRateChart(initialBalance, expenses, quarters);
+
   return (
-    <div className="container">
-      <h1 className="my-4 text-center">Burn Rate Projection</h1>
-      <div className="form-group">
-        <label htmlFor="initial-balance">Initial Balance:</label>
-        <input
-          type="number"
-          className="form-control"
-          id="initial-balance"
-          value={initialBalance}
-          onChange={(e) => setInitialBalance(e.target.value)}
-        />
-      </div>
-      <div className="form-group">
-        <label htmlFor="expenses">Expenses:</label>
-        <input
-          type="number"
-          className="form-control"
-          id="expenses"
-          value={expenses}
-          onChange={(e) => setExpenses(e.target.value)}
-        />
-      </div>
-      <button className="btn btn-primary mb-4" onClick={createBurnRateChart}>
-        Create Chart
-      </button>
-      <canvas id="burn-rate-chart"></canvas>
-    </div>
+    <Container>
+      <h1 className="my-4 text-center">Burn Rate Projection Calculator</h1>
+      <Form>
+        <Form.Group controlId="initialBalance">
+          <Form.Label>Starting Cash Balance</Form.Label>
+          <Form.Control
+            type="number"
+            value={initialBalance}
+            onChange={(e) => setInitialBalance(parseInt(e.target.value))}
+            placeholder="Enter starting cash balance"
+          />
+        </Form.Group>
+        <Form.Group controlId="expenses">
+          <Form.Label>Monthly Expenses</Form.Label>
+          <Form.Control
+            type="number"
+            value={expenses}
+            onChange={(e) => setExpenses(parseInt(e.target.value))}
+            placeholder="Enter monthly expenses"
+          />
+        </Form.Group>
+        <Form.Group controlId="quarters">
+          <Form.Label>Number of Quarters</Form.Label>
+          <Form.Control
+            type="number"
+            value={quarters}
+            onChange={(e) => setQuarters(parseInt(e.target.value))}
+            placeholder="Enter number of quarters"
+          />
+        </Form.Group>
+      </Form>
+      <Button
+        className="mb-4"
+        onClick={updateChart}
+        disabled={!initialBalance || !expenses || !quarters} // Add this line
+      >
+        Update Chart
+      </Button>
+      <canvas ref={canvasRef}></canvas>
+      {!initialBalance || !expenses || !quarters && ( // Add this line
+        <div className="alert alert-danger" role="alert">
+          Please enter values for all fields
+        </div>
+      )}
+    </Container>
   );
 };
 
-ReactDOM.render(<App />, document.getElementById('root'));
+export default BurnRateCalculator;
