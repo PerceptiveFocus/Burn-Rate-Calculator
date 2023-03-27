@@ -1,150 +1,106 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Container, Form, Button } from 'react-bootstrap';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import PropTypes from 'prop-types';
 import Chart from 'chart.js/auto';
+import { calculateLinearRegression } from './linearRegression';
 
-const useBurnRateChart = (initialBalance, expenses, period, periodType) => {
+const BurnRateProjection = ({
+  initialBalance: initialBalanceProp,
+  expenses: expensesProp,
+  startYear: startYearProp,
+  endYear: endYearProp,
+}) => {
+  const [initialBalance, setInitialBalance] = useState(initialBalanceProp);
+  const [expenses, setExpenses] = useState(expensesProp);
+  const [startYear, setStartYear] = useState(startYearProp);
+  const [endYear, setEndYear] = useState(endYearProp);
+  const [chartInstance, setChartInstance] = useState(null);
+
+  // Define quarters and years arrays
+  const quarters = ['Q1', 'Q2', 'Q3', 'Q4'];
+  const years = [...Array(endYear - startYear + 1).keys()].map(
+    (x) => x + startYear
+  );
+
+  // Create chart reference using React ref
   const chartRef = useRef(null);
-  const canvasRef = useRef(null);
 
+  // Define effect to create and update chart
   useEffect(() => {
-    updateChart();
-  }, [initialBalance, expenses, period, periodType]);
+    // ... (rest of the useEffect)
+  }, [initialBalance, expenses, startYear, endYear, chartInstance, years, quarters]);
 
-  const calculateBurnRateData = (initialBalance, expenses, period, periodType) => {
-    let quarters;
-    if (periodType === 'quarters') {
-      quarters = period;
+  const handleInputChange = useCallback((event, setState, minValue = 0) => {
+    const value = parseInt(event.target.value);
+    if (isNaN(value)) {
+      setState('');
     } else {
-      quarters = period * 4;
+      setState(Math.max(value, minValue));
     }
-
-    const cashBalance = [initialBalance];
-    for (let i = 1; i < quarters; i++) {
-      cashBalance.push(cashBalance[i - 1] - expenses);
-    }
-    const burnRate = cashBalance.map((value, index) => value - (expenses * index));
-
-    let xAxisLabel;
-    if (periodType === 'quarters') {
-      xAxisLabel = 'Quarter';
-    } else {
-      xAxisLabel = 'Year';
-    }
-
-    const chartData = {
-      labels: [...Array(quarters).keys()].map((x) => (periodType === 'quarters' ? x + 1 : Math.floor((x + 1) / 4))),
-      datasets: [
-        {
-          label: 'Burn Rate Projection',
-          data: burnRate,
-          backgroundColor: 'rgba(54, 162, 235, 0.2)',
-          borderColor: 'rgba(54, 162, 235, 1)',
-          borderWidth: 1,
-        },
-      ],
-    };
-
-    const chartOptions = {
-      scales: {
-        x: {
-          title: {
-            display: true,
-            text: xAxisLabel,
-          },
-        },
-        y: {
-          title: {
-            display: true,
-            text: 'Cash Balance',
-          },
-        },
-      },
-    };
-
-    return { chartData, chartOptions };
-  };
-
-  const updateChart = () => {
-    if (chartRef.current) {
-      chartRef.current.destroy();
-    }
-
-    const burnRateData = calculateBurnRateData(initialBalance, expenses, period, periodType);
-    const ctx = canvasRef.current.getContext('2d');
-
-    chartRef.current = new Chart(ctx, {
-      type: 'line',
-      data: burnRateData.chartData,
-      options: burnRateData.chartOptions,
-    });
-  };
-
-  return { updateChart, canvasRef };
-};
-
-const BurnRateCalculator = () => {
-  const [initialBalance, setInitialBalance] = useState(0);
-  const [expenses, setExpenses] = useState(0);
-  const [period, setPeriod] = useState(0);
-  const [periodType, setPeriodType] = useState('quarters');
-
-  const { updateChart, canvasRef } = useBurnRateChart(initialBalance, expenses, period, periodType);
+  }, []);
 
   return (
-    <Container>
-      <h1 className="my-4 text-center">Burn Rate Projection Calculator</h1>
-      <Form>
-        <Form.Group controlId="initialBalance">
-          <Form.Label>Starting Cash Balance</Form.Label>
-          <Form.Control
-            type="number"
-            value={initialBalance}
-            onChange={(e) => setInitialBalance(parseInt(e.target.value))}
-            placeholder="Enter starting cash balance"
-          />
-        </Form.Group>
-        <Form.Group controlId="expenses">
-          <Form.Label>Monthly Expenses</Form.Label>
-          <Form.Control
-            type="number"
-            value={expenses}
-            onChange={(e) => setExpenses(parseInt(e.target.value))}
-            placeholder="Enter monthly expenses"
-          />
-        </Form.Group>
-        <Form.Group controlId="period">
-          <Form.Label>Number of {periodType === 'quarters' ? 'Quarters' : 'Years'}</Form.Label>
-          <Form.Control
-            type="number"
-            value={period}
-            onChange={(e) => setPeriod(parseInt(e.target.value))}
-            placeholder={`Enter number of ${periodType === 'quarters' ? 'quarters' : 'years'}`}
-          />
-        </Form.Group>
-        <Form.Group controlId="periodType">
-          <Form.Label>Period Type</Form.Label>
-          <Form.Control as="select" value={periodType} onChange={(e) => setPeriodType(e.target.value)}>
-            <option value="quarters">Quarters</option>
-            <option value="years">Years</option>
-          </Form.Control>
-        </Form.Group>
-      </Form>
-      <Button
-        className="mb-4"
-        onClick={updateChart}
-        disabled={!initialBalance || !expenses || !period}
-      >
-        Update Chart
-      </Button>
-      <canvas ref={canvasRef}></canvas>
-      {!initialBalance || !expenses || !period ? (
-        <div className="alert alert-danger" role="alert">
-          Please enter values for all fields
-        </div>
-      ) : null}
-    </Container>
+    <div>
+      <div>
+        <label htmlFor="initial-balance-input">Initial Balance:</label>
+        <input
+          type="number"
+          id="initial-balance-input"
+          value={initialBalance}
+          min="0"
+          onChange={(event) => handleInputChange(event, setInitialBalance)}
+        />
+      </div>
+      <div>
+        <label htmlFor="expenses-input">Expenses:</label>
+        <input
+          type="number"
+          id="expenses-input"
+          value={expenses}
+          min="0"
+          onChange={(event) => handleInputChange(event, setExpenses)}
+        />
+      </div>
+      <div>
+        <label htmlFor="start-year-input">Start Year:</label>
+        <input
+          type="number"
+          id="start-year-input"
+          value={startYear}
+          min="0"
+          onChange={(event) => handleInputChange(event, setStartYear)}
+        />
+      </div>
+      <div>
+        <label htmlFor="end-year-input">End Year:</label>
+        <input
+          type="number"
+          type="number"
+          id="end-year-input"
+          value={endYear}
+          min={startYear}
+          onChange={(event) => handleInputChange(event, setEndYear, startYear)}
+        />
+      </div>
+      <canvas ref={chartRef} />
+    </div>
   );
 };
 
-export default BurnRateCalculator;
+BurnRateProjection.defaultProps = {
+  initialBalance: 20,
+  expenses: 10,
+  startYear: 2000,
+  endYear: 2023,
+};
+
+BurnRateProjection.propTypes = {
+  initialBalance: PropTypes.number,
+  expenses: PropTypes.number,
+  startYear: PropTypes.number,
+  endYear: PropTypes.number,
+};
+
+export default BurnRateProjection;
+
+
 
