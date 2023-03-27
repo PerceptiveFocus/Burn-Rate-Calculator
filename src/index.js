@@ -1,16 +1,18 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
-import BurnRateCalculator from './BurnRateProjection';
+import BurnRateProjection from './BurnRateProjection';
+import ChartWrapper from './ChartWrapper';
 
-try {
-  ReactDOM.render(
-    <React.StrictMode>
-      <BurnRateCalculator />
-    </React.StrictMode>,
-    document.getElementById('root')
-  );
-} catch (error) {
-  console.error('Error rendering React app:', error);
-}
+(async () => {
+  try {
+    ReactDOM.render(
+      <React.StrictMode>
+        <BurnRateProjection />
+      </React.StrictMode>,
+      document.getElementById('root')
+    );
+  } catch (error) {
+    console.error('Error rendering React app:', error);
+  }
+})();
