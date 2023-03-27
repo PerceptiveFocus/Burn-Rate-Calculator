@@ -9,11 +9,7 @@ const BurnRateProjection = ({
   startYear: startYearProp,
   endYear: endYearProp,
 }) => {
-  const [initialBalance, setInitialBalance] = useState(initialBalanceProp);
-  const [expenses, setExpenses] = useState(expensesProp);
-  const [startYear, setStartYear] = useState(startYearProp);
-  const [endYear, setEndYear] = useState(endYearProp);
-  const [chartInstance, setChartInstance] = useState(null);
+  // ... (rest of the useState hooks)
 
   // Define quarters and years arrays
   const quarters = ['Q1', 'Q2', 'Q3', 'Q4'];
@@ -26,65 +22,71 @@ const BurnRateProjection = ({
 
   // Define effect to create and update chart
   useEffect(() => {
-    // ... (rest of the useEffect)
+    const ctx = chartRef.current.getContext('2d');
+    const chartData = generateChartData(); // You need to define this function
+    const chartOptions = {}; // Set your chart options here
+
+    if (chartInstance) {
+      chartInstance.data = chartData;
+      chartInstance.options = chartOptions;
+      chartInstance.update();
+    } else {
+      const newChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: chartData,
+        options: chartOptions,
+      });
+      setChartInstance(newChartInstance);
+    }
   }, [initialBalance, expenses, startYear, endYear, chartInstance, years, quarters]);
 
-  const handleInputChange = useCallback((event, setState, minValue = 0) => {
-    const value = parseInt(event.target.value);
-    if (isNaN(value)) {
-      setState('');
-    } else {
-      setState(Math.max(value, minValue));
-    }
-  }, []);
+  const generateChartData = () => {
+    // Generate data points for the chart
+    const dataPoints = years.flatMap((year) =>
+      quarters.map((quarter) => ({
+        x: `${year}-${quarter}`,
+        y: initialBalance - expenses * (year - startYear) * 4,
+      }))
+    );
+
+    return {
+      labels: dataPoints.map((point) => point.x),
+      datasets: [
+        {
+          label: 'Burn Rate',
+          data: dataPoints.map((point) => point.y),
+          borderColor: 'rgba(75, 192, 192, 1)',
+          backgroundColor: 'rgba(75, 192, 192, 0.2)',
+          fill: false,
+        },
+      ],
+    };
+  };
+
+  // ... (rest of the component code)
 
   return (
-    <div>
-      <div>
-        <label htmlFor="initial-balance-input">Initial Balance:</label>
-        <input
-          type="number"
-          id="initial-balance-input"
-          value={initialBalance}
-          min="0"
-          onChange={(event) => handleInputChange(event, setInitialBalance)}
-        />
-      </div>
-      <div>
-        <label htmlFor="expenses-input">Expenses:</label>
-        <input
-          type="number"
-          id="expenses-input"
-          value={expenses}
-          min="0"
-          onChange={(event) => handleInputChange(event, setExpenses)}
-        />
-      </div>
-      <div>
-        <label htmlFor="start-year-input">Start Year:</label>
-        <input
-          type="number"
-          id="start-year-input"
-          value={startYear}
-          min="0"
-          onChange={(event) => handleInputChange(event, setStartYear)}
-        />
-      </div>
-      <div>
-        <label htmlFor="end-year-input">End Year:</label>
-        <input
-          type="number"
-          type="number"
-          id="end-year-input"
-          value={endYear}
-          min={startYear}
-          onChange={(event) => handleInputChange(event, setEndYear, startYear)}
-        />
+    <div className="container">
+      <h1>Burn Rate Projection</h1>
+      <div className="form-group">
+        {/* ... (rest of the input fields) */}
       </div>
       <canvas ref={chartRef} />
     </div>
   );
 };
+
+// ... (rest of the component code)
+
+return (
+  <div className="container">
+    <h1>Burn Rate Projection</h1>
+    <div className="form-group">
+      {/* ... (rest of the input fields) */}
+    </div>
+    <canvas ref={chartRef} />
+  </div>
+);
 
 BurnRateProjection.defaultProps = {
   initialBalance: 20,
@@ -101,6 +103,3 @@ BurnRateProjection.propTypes = {
 };
 
 export default BurnRateProjection;
-
-
-
