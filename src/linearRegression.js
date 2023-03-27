@@ -1,23 +1,22 @@
 export function calculateLinearRegression(xValues, yValues) {
   const n = xValues.length;
-  let sumX = 0;
-  let sumY = 0;
-  let sumXY = 0;
-  let sumXX = 0;
-  let sumYY = 0;
+  const sum = (arr) => arr.reduce((acc, val) => acc + val, 0);
 
-  for (let i = 0; i < n; i++) {
-    sumX += xValues[i];
-    sumY += yValues[i];
-    sumXY += xValues[i] * yValues[i];
-    sumXX += xValues[i] * xValues[i];
-    sumYY += yValues[i] * yValues[i];
-  }
+  const sumX = sum(xValues);
+  const sumY = sum(yValues);
+  const sumXY = sum(xValues.map((x, i) => x * yValues[i]));
+  const sumXX = sum(xValues.map((x) => x * x));
+  const sumYY = sum(yValues.map((y) => y * y));
 
-  const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
-  const intercept = (sumY - slope * sumX) / n;
-  const rSquared = Math.pow((n * sumXY - sumX * sumY) / Math.sqrt((n * sumXX - sumX * sumX) * (n * sumYY - sumY * sumY)), 2);
+  const slopeNumerator = (n * sumXY) - (sumX * sumY);
+  const slopeDenominator = (n * sumXX) - (sumX * sumX);
+  const slope = slopeNumerator / slopeDenominator;
+
+  const intercept = (sumY - (slope * sumX)) / n;
+
+  const rSquaredNumerator = (n * sumXY) - (sumX * sumY);
+  const rSquaredDenominator = Math.sqrt((n * sumXX - sumX * sumX) * (n * sumYY - sumY * sumY));
+  const rSquared = Math.pow(rSquaredNumerator / rSquaredDenominator, 2);
 
   return { slope, intercept, rSquared };
 }
-
