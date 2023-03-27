@@ -2,7 +2,6 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import BurnRateProjection from './BurnRateProjection';
-import ChartWrapper from './ChartWrapper';
 
 (async () => {
   try {
