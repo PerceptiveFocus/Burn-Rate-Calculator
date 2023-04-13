@@ -1,17 +1,18 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
-import BurnRateProjection from './BurnRateProjection';
+import MainComponent from './MainComponent';
+import Footer from './Footer';
+import reportWebVitals from './reportWebVitals';
 
-(async () => {
-  try {
-    ReactDOM.render(
-      <React.StrictMode>
-        <BurnRateProjection />
-      </React.StrictMode>,
-      document.getElementById('root')
-    );
-  } catch (error) {
-    console.error('Error rendering React app:', error);
-  }
-})();
+ReactDOM.render(
+  <React.StrictMode>
+    <MainComponent />
+    <Footer />
+  </React.StrictMode>,
+  document.getElementById('root')
+);
+
+reportWebVitals();
+
