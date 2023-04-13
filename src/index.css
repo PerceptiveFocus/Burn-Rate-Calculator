@@ -1,11 +1,20 @@
-/* ... (rest of the CSS reset and global styles) ... */
+/* CSS Reset */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Montserrat', sans-serif;
+}
 
 /* Layout */
 .container {
   max-width: 960px;
   margin: 0 auto;
   padding: 2rem;
-  background-color: #ffffff;
+  background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
@@ -13,8 +22,10 @@
 /* Typography */
 h1 {
   margin-bottom: 2rem;
-  font-size: 2.4rem;
+  font-size: 3.2rem;
   text-align: center;
+  color: #007bff;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1);
 }
 
 /* Form */
@@ -28,7 +39,7 @@ h1 {
 label {
   margin-bottom: 0.5rem;
   font-weight: 600;
-  font-size: 1.4rem;
+  font-size: 1.6rem;
   color: #333;
 }
 
@@ -39,24 +50,46 @@ input[type="text"] {
   padding: 0.75rem;
   font-size: 1.6rem;
   color: #333;
-  background-color: #fff;
-  border: 1px solid #ccc;
+  background-color: #f7f7f7;
+  border: 2px solid #007bff;
   border-radius: 4px;
   transition: border-color 0.3s;
 }
 
 input[type="number"]:focus,
 input[type="text"]:focus {
-  border-color: #007bff;
-  outline: none;
+  border-color: #333;
+}
+
+.btn {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: #fff;
+  background-color: #007bff;
+  border: none;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: box-shadow 0.3s;
+}
+
+.btn:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 /* Chart */
+.chart-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 2rem;
+}
+
 canvas {
-  display: block;
-  margin: 1.5rem auto;
   max-width: 100%;
-  height: 400px;
+  height: 300px;
   background-color: #fff;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
@@ -69,4 +102,43 @@ canvas {
 
 .chart-label {
   color: #333;
+}
+
+/* New styles for UI/UX */
+.background-image {
+  background-image: url('https://github.com/PerceptiveFocus/code/blob/main/Downloads/Burn-Rate-Calculator-main-3/src/XManuel_background_image_for_my_fintech_company_app_with_no_peo_17451274-1d4c-4156-bca8-77d3ef07ec83.jpeg');
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+}
+
+/* Responsive Styles */
+@media screen and (max-width: 767px) {
+.container {
+padding: 1rem;
+}
+}
+
+h1 {
+  font-size: 22.4rem;
+}
+
+@media screen and (max-width: 767px) {
+  /* Responsive styles */
+  h1 {
+    font-size: 16rem;
+  }
+}
+
+label {
+font-size: 1.4rem;
+}
+
+input[type="number"],
+input[type="text"] {
+font-size: 1.4rem;
+}
+
+.btn {
+font-size: 1.4rem;
 }
